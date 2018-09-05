@@ -1,0 +1,8 @@
+.vscode
+TimeCard/*.json
+TimeCard/bin
+TimeCard/obj
+TimeCard.Shared/bin
+TimeCard.Shared/obj
+TimeCard.Repositories/bin
+TimeCard.Repositories/obj
