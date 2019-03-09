@@ -17,7 +17,7 @@ namespace TimeCard.Repositories
         {
             _conn = conn;
         }
-        private const String SelectSql = "SELECT `P`.`Id`,`P`.`Pay` AS `PayAmt`, `P`.`Hours`, `P`.`PeriodStart`, `P`.`PeriodEnd`, `P`.`CheckDate`, `P`.`CheckNumber`, `P`.`SitterId`, `C`.`Comment`, `P`.`DateModified` FROM `TIME_CARD`.`PAY` AS P LEFT JOIN `TIME_CARD`.`COMMENTS` AS C ON `P`.`Id` = `C`.`PayId`";
+        private const String SelectSql = "USE TIME_CARD; SELECT `P`.`Id`,`P`.`Pay` AS `PayAmt`, `P`.`Hours`, `P`.`PeriodStart`, `P`.`PeriodEnd`, `P`.`CheckDate`, `P`.`CheckNumber`, `P`.`SitterId`, `C`.`Comment`, `P`.`DateModified` FROM `TIME_CARD`.`PAY` AS P LEFT JOIN `TIME_CARD`.`COMMENTS` AS C ON `P`.`Id` = `C`.`PayId`";
 
         public int AddPay(Pay pay)
         {
@@ -25,12 +25,18 @@ namespace TimeCard.Repositories
             StringBuilder addPay = new StringBuilder();
             addPay.Append("INSERT INTO `TIME_CARD`.`PAY` ");
             addPay.Append("(`Pay`,");
+            addPay.Append("`Hours`,");
+            addPay.Append("`PeriodStart`,");
+            addPay.Append("`PeriodEnd`,");
             addPay.Append("`CheckDate`,");
             addPay.Append("`CheckNumber`,");
             addPay.Append("`SitterId`,");
             addPay.Append("`DateModified`");
             addPay.Append(") VALUES ");
             addPay.Append("(@PayAmt,");
+            addPay.Append("@Hours,");
+            addPay.Append("@PeriodStart,");
+            addPay.Append("@PeriodEnd,");
             addPay.Append("@CheckDate,");
             addPay.Append("@CheckNumber,");
             addPay.Append("@SitterId,");
@@ -92,17 +98,18 @@ namespace TimeCard.Repositories
             using (var conn = _conn)
             {
                 conn.Open();
-                var results = await conn.QueryAsync<PayJson>($"{SelectSql} ORDER BY `P`.`Id` DESC;");
+                var results = await conn.QueryAsync<PayJson>($"{SelectSql} ORDER BY YEAR(`P`.`CheckDate`) DESC, `P`.`CheckNumber` DESC;");
                 //var t = Task<PunchesRoot>.Run(() => new PunchesRoot() { Punchs = x });
                 return new PayRootCollectionJson() { PayJson = results };
             }
         }
+        // Get Pays by SitterId
         public async Task<PayRootCollectionJson> GetPays(int id)
         {
             using (var conn = _conn)
             {
                 conn.Open();
-                var results = await conn.QueryAsync<PayJson>($"{SelectSql} WHERE `P`.`SitterId` = @Id ORDER BY `P`.`CheckDate` ASC;", new { id });
+                var results = await conn.QueryAsync<PayJson>($"{SelectSql} WHERE `P`.`SitterId` = @Id ORDER BY YEAR(`P`.`CheckNumber`), `P`.`CheckNumber` DESC;", new { id });
                 //var t = Task<PunchesRoot>.Run(() => new PunchesRoot() { Punchs = x });
                 return new PayRootCollectionJson() { PayJson = results };
             }

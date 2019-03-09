@@ -12,7 +12,7 @@ namespace TimeCard.Repositories
     public class SitterRepository : ISitterRepository
     {
         private readonly IDbConnection _conn;
-        private const string SelectSql = "SELECT `S`.`Id`, `S`.`LastName`, `S`.`FirstName`, `S`.`RateId`, `R`.`Rate`, `S`.`Phone`, `S`.`SMSGateway`, `S`.`MMSGateway`, `S`.`DateModified` FROM `TIME_CARD`.`SITTERS` AS `S` LEFT JOIN `TIME_CARD`.`RATE` AS `R` ON `S`.`RateId` = `R`.`Id`";
+        private const string SelectSql = "USE TIME_CARD; SELECT `S`.`Id`, `S`.`LastName`, `S`.`FirstName`, `S`.`RateId`, `R`.`Rate`, `S`.`Phone`, `S`.`SMSGateway`, `S`.`MMSGateway`, `S`.`DateModified` FROM `TIME_CARD`.`SITTERS` AS `S` LEFT JOIN `TIME_CARD`.`RATE` AS `R` ON `S`.`RateId` = `R`.`Id`";
 
         public SitterRepository(IDbConnection conn)
         {
@@ -27,11 +27,17 @@ namespace TimeCard.Repositories
             addSitter.Append("(`LastName`,");
             addSitter.Append("`FirstName`,");
             addSitter.Append("`RateId`,");
+            addSitter.Append("`Phone`,");
+            addSitter.Append("`SMSGateway`,");
+            addSitter.Append("`MMSGateway`,");
             addSitter.Append("`DateModified`");
             addSitter.Append(") VALUES ");
             addSitter.Append("(@LastName,");
             addSitter.Append("@FirstName,");
             addSitter.Append("@RateId,");
+            addSitter.Append("@Phone,");
+            addSitter.Append("@SMSGateway,");
+            addSitter.Append("@MMSGateway,");
             addSitter.Append("@DateModified);");
             try
             {
@@ -95,7 +101,7 @@ namespace TimeCard.Repositories
                 using (var conn = _conn)
                 {
                     conn.Open();
-                    return new SittersRoot() { Sitter = conn.QueryFirst<Sitter>("SELECT * FROM `TIME_CARD`.`SITTERS` WHERE Id = @Id;", new { id }) };
+                    return new SittersRoot() { Sitter = conn.QueryFirst<Sitter>($"{SelectSql} WHERE `S`.`Id` = @Id;", new { id }) };
                 }
             }
             catch (Exception e)

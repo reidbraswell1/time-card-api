@@ -12,7 +12,7 @@ namespace TimeCard.Repositories
     public class PunchRepository : IPunchRepository
     {
         private readonly IDbConnection _conn;
-        private const String SelectSql = "SELECT `P`.`Id`, `P`.`Punch` AS `TimePunch`, UNIX_TIMESTAMP(`P`.`Punch`) AS `TimePunchSeconds`, `P`.`SitterId`, `C`.`Comment`, `P`.`DateModified` FROM `TIME_CARD`.`PUNCH` AS P LEFT JOIN `TIME_CARD`.`COMMENTS` AS C ON DATE(`P`.`PUNCH`) = `C`.`Id` AND `P`.`SitterId` = `C`.`SitterId`";
+        private const String SelectSql = "USE TIME_CARD; SELECT `P`.`Id`, `P`.`Punch` AS `TimePunch`, UNIX_TIMESTAMP(`P`.`Punch`) AS `TimePunchSeconds`, `P`.`SitterId`, `C`.`Comment`, `P`.`DateModified` FROM `TIME_CARD`.`PUNCH` AS P LEFT JOIN `TIME_CARD`.`COMMENTS` AS C ON DATE(`P`.`PUNCH`) = `C`.`Id` AND `P`.`SitterId` = `C`.`SitterId`";
         public PunchRepository(IDbConnection conn)
         {
             _conn = conn;
@@ -59,8 +59,8 @@ namespace TimeCard.Repositories
         }
         public int DeletePunch(int id)
         {
-            var punchRoot = GetPunch(id);
-            var punch = punchRoot.Punch;
+            var punchRootJson = GetPunch(id);
+            var punch = punchRootJson.PunchJson;
             using (var conn = _conn)
             {
                 conn.Open();
@@ -69,8 +69,8 @@ namespace TimeCard.Repositories
                 {
                     Comments comment = new Comments()
                     {
-                        Id = DateTime.Parse((punch.TimePunch).ToString("yyyy-MM-dd")),
-                        SitterId = punch.SitterId,
+                        Id = DateTime.Parse((DateTime.Parse(punch.TimePunch).ToString("yyyy-MM-dd"))),
+                        SitterId = Convert.ToInt32(punch.SitterId)
                     };
                     DeleteComment(comment, conn);
                 }
@@ -116,12 +116,12 @@ namespace TimeCard.Repositories
                 return result;
             }
         }
-        public PunchRoot GetPunch(int id)
+        public PunchRootJson GetPunch(int id)
         {
             using (var conn = _conn)
             {
                 conn.Open();
-                return new PunchRoot() { Punch = conn.QueryFirst<Punch>($"{SelectSql} WHERE `P`.`Id` = @Id;", new { id }) };
+                return new PunchRootJson() { PunchJson = conn.QueryFirst<PunchJson>($"{SelectSql} WHERE `P`.`Id` = @Id;", new { id }) };
             }
         }
         //public Task<IEnumerable<Punch>> GetPunches()
@@ -135,26 +135,26 @@ namespace TimeCard.Repositories
                 return new PunchRootCollection() { Punches = results };
             }
         }
-        public async Task<PunchRootCollection> GetPunches(int id)
+        public async Task<PunchRootCollectionJson> GetPunches(int id)
         {
             using (var conn = _conn)
             {
                 conn.Open();
-                var results = await conn.QueryAsync<Punch>($"{SelectSql} WHERE `P`.`SitterId` = @Id ORDER BY `P`.`Punch` DESC;", new { id });
+                var results = await conn.QueryAsync<PunchJson>($"{SelectSql} WHERE `P`.`SitterId` = @Id ORDER BY `P`.`Punch` DESC;", new { id });
                 //var t = Task<PunchesRoot>.Run(() => new PunchesRoot() { Punchs = x });
-                return new PunchRootCollection() { Punches = results };
+                return new PunchRootCollectionJson() { PunchJson = results };
             }
         }
         public async Task<PunchRootCollectionJson> GetPunches(int id, DateTime periodStart, DateTime periodEnd)
         {
             using (var conn = _conn)
             {
-                periodStart = periodStart.Date;
-                periodEnd = periodEnd.Date;
-                var ts = new TimeSpan(23,59,59);
-                periodEnd = periodEnd + ts;
-                ts = new TimeSpan(6,0,0);
-                periodStart = periodStart + ts;
+                //periodStart = periodStart.Date;
+                //periodEnd = periodEnd.Date;
+                //var ts = new TimeSpan(23,59,59);
+                //periodEnd = periodEnd + ts;
+                //ts = new TimeSpan(6,0,0);
+                //periodStart = periodStart + ts;
                 periodStart = periodStart.ToUniversalTime();
                 periodEnd = periodEnd.ToUniversalTime();
                 conn.Open();
