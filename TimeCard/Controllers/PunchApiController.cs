@@ -25,7 +25,11 @@ namespace TimeCard.Controllers
             try
             {
                 var results = await _punchRepo.GetPunches();
-                return Ok(results);
+                if (results.Punches.Any())
+                {
+                    return Ok(results);
+                }
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = "Sequence contains no elements" } });
             }
             catch (Exception e)
             {
@@ -38,7 +42,10 @@ namespace TimeCard.Controllers
         {
             try
             {
-                return Ok(await _punchRepo.GetPunches(id));
+                var results = await _punchRepo.GetPunches(id);
+                if (results.PunchJson.Any())
+                    return Ok(results);
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = "Sequence contains no elements" } });
             }
             catch (Exception e)
             {
@@ -46,25 +53,26 @@ namespace TimeCard.Controllers
             }
         }
         [HttpGet("api/punch/sitter-id/{id:int}/{periodStart:datetime}/{periodEnd:datetime}")]
-        public async Task<PunchRootCollectionJson> GetPunchSitterId(int id, DateTime periodStart, DateTime periodEnd)
+        //public async Task<PunchRootCollectionJson> GetPunchSitterId(int id, DateTime periodStart, DateTime periodEnd)
+        public async Task<IActionResult> GetPunchSitterId(int id, DateTime periodStart, DateTime periodEnd)
         {
             try
             {
                 var results = await _punchRepo.GetPunches(id, periodStart, periodEnd);
                 if (results.PunchJson.Any())
                 {
-                    return results;
+                    return Ok(results);
                 }
-                return new PunchRootCollectionJson();
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = "Sequence contains no elements" } });
             }
             catch (Exception e)
             {
-                return null;
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = e.Message } });
             }
         }
 
         [HttpGet("api/punch/sitter-id-list/{id:int}/{periodStart:datetime}/{periodEnd:datetime}")]
-        public async Task<List<IGrouping<String,String>>> GetPunchSitterIdList(int id, DateTime periodStart, DateTime periodEnd)
+        public async Task<List<IGrouping<String, String>>> GetPunchSitterIdList(int id, DateTime periodStart, DateTime periodEnd)
         {
             try
             {
@@ -90,7 +98,7 @@ namespace TimeCard.Controllers
                         }
                         punches.Add(punchJson.SitterId + " " + punchJson.TimePunch);
                         var punches3 = from punch in punches
-                                       group punch by punch.Substring(2,3);
+                                       group punch by punch.Substring(2, 3);
                         punches4 = punches3.ToList();
                     }
                     punches.Add("Total Time = " + Math.Abs(sumTime / 3600));
@@ -106,15 +114,24 @@ namespace TimeCard.Controllers
 
         // GET api/<controller>/5
         [HttpGet("api/punch/{id:int}")]
-        public PunchRoot Get(int id)
+        //public PunchRootJson Get(int id)
+        public IActionResult Get(int id)
         {
             try
             {
-                return _punchRepo.GetPunch(id);
+                var results = _punchRepo.GetPunch(id);
+                if (results != null)
+                {
+                    return Ok(results);
+                }
+                else
+                {
+                    return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = "Sequence contains no elements" } });
+                }
             }
             catch (Exception e)
             {
-                return new PunchRoot();
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = e.Message } });
             }
         }
         // POST api/<controller>

@@ -35,29 +35,40 @@ namespace TimeCard.Controllers
 
         // GET: api/<controller>
         [HttpGet("api/sitter")]
-        public async Task<SittersRootCollectionJson> Get()
+        //public async Task<SittersRootCollectionJson> Get()
+        public async Task<IActionResult> Get()
         {
             try
             {
-                return await _sitterRepo.GetSitters();
+                var results = await _sitterRepo.GetSitters();
+                if (results.SitterJson.Any())
+                {
+                    return Ok(results);
+                }
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = "Sequence contains no elements" } });
             }
             catch (Exception e)
             {
-                return new SittersRootCollectionJson();
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = e.Message } });
             }
         }
 
         // GET api/<controller>/5
         [HttpGet("api/sitter/{id:int}")]
-        public SittersRoot Get(int id)
+        //public SittersRoot Get(int id)
+        public IActionResult Get(int id)
         {
             try
             {
-                return _sitterRepo.GetSitter(id);
+                var results = _sitterRepo.GetSitter(id);
+                if (results != null)
+                    return Ok(results);
+                else
+                    return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = "Sequence contains no elements" } });
             }
             catch (Exception e)
             {
-                return new SittersRoot();
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = e.Message } });
             }
         }
         // POST api/<controller>

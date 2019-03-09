@@ -34,52 +34,72 @@ namespace TimeCard.Controllers
             _deleteAuthKey = _configuration.GetSection("APIKeys").GetSection("API-Authorization-Delete").Value;
         }
         [HttpGet("api/pay")]
-        public async Task<PayRootCollectionJson> Get()
+        //public async Task<PayRootCollectionJson> Get()
+        public async Task<IActionResult> Get()
         {
             try
             {
-                return await _payRepo.GetPays();
+                var results = await _payRepo.GetPays();
+                if (results.PayJson.Any())
+                {
+                    return Ok(results);
+                }
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = "Sequnce contains no elements." } });
             }
             catch (Exception e)
             {
-                return new PayRootCollectionJson();
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = e.Message } });
             }
         }
         [HttpGet("api/pay/sitter-id/{id:int}")]
-        public async Task<PayRootCollectionJson> GetPaySitterId(int id)
+        //public async Task<PayRootCollectionJson> GetPaySitterId(int id)
+        public async Task<IActionResult> GetPaySitterId(int id)
         {
             try
             {
-                return await _payRepo.GetPays(id);
+                var results = await _payRepo.GetPays(id);
+                if (results.PayJson.Any())
+                {
+                    return Ok(results);
+                }
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = "Sequence contains no elements." } });
             }
             catch (Exception e)
             {
-                return new PayRootCollectionJson();
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = e.Message } });
             }
         }
+
         [HttpGet("api/pay/sitter-id/{id:int}/{date:datetime}")]
-        public async Task<PayRootCollectionJson> GetPaySitterId(int id, DateTime date)
+        //public async Task<PayRootCollectionJson> GetPaySitterId(int id, DateTime date)
+        public async Task<IActionResult> GetPaySitterId(int id, DateTime date)
         {
             try
             {
-                return await _payRepo.GetPays(id, date);
+                var results = await _payRepo.GetPays(id, date);
+                if (results.PayJson.Any())
+                {
+                    return Ok(results);
+                }
+                return Ok(new PayRootCollectionJson() { PayJson = new List<PayJson>() { new PayJson() { Comment = "Sequence contains no elements." } } });
             }
             catch (Exception e)
             {
-                return new PayRootCollectionJson();
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = e.Message } });
             }
         }
         // GET api/<controller>/5
         [HttpGet("api/pay/{id:int}")]
-        public PayRootJson Get(int id)
+        //public PayRootJson Get(int id)
+        public IActionResult Get(int id)
         {
             try
             {
-                return _payRepo.GetPayString(id);
+                return Ok(_payRepo.GetPayString(id));
             }
             catch (Exception e)
             {
-                return new PayRootJson();
+                return Ok(new ErrorException() { ErrorExceptionMessage = new ErrorExceptionMessage() { Message = e.Message } });
             }
         }
         [HttpPost("api/pay")]
