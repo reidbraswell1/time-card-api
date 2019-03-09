@@ -8,10 +8,10 @@ namespace TimeCard.Shared
         int AddPunch(Punch punch);
         int DeletePunch(int id);
         int UpdatePunch(Punch punch);
-        PunchRoot GetPunch(int id);
+        PunchRootJson GetPunch(int id);
         //Task<IEnumerable<Sitter>> GetSitters();
         Task<PunchRootCollection> GetPunches();
-        Task<PunchRootCollection> GetPunches(int id);
+        Task<PunchRootCollectionJson> GetPunches(int id);
         Task<PunchRootCollectionJson> GetPunches(int id, DateTime periodStart, DateTime periodEnd);
     }
 }
