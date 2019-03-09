@@ -21,14 +21,30 @@ namespace TimeCard.Shared
         public string Id { get; set; }
         public string PayAmt { get; set; }
         public string Hours { get; set; }
-        public string PeriodStart { get; set; }
-        public string PeriodEnd { get; set; }
+        private string periodStart;
+        public string PeriodStart
+        {
+            get
+            {
+                return (periodStart != null && periodStart.Length >= 7) ? periodStart.Substring(0, periodStart.IndexOf(' ')) : periodStart;
+            }
+            set { periodStart = value; }
+        }
+        private string periodEnd;
+        public string PeriodEnd
+        {
+            get
+            {
+                return (periodEnd != null && periodEnd.Length >= 7) ? periodEnd.Substring(0, periodEnd.IndexOf(' ')) : periodEnd;
+            }
+            set { periodEnd = value; }
+        }
         private string checkDate;
         public string CheckDate
         {
             get
             {
-                return (checkDate.Length >= 7) ? checkDate.Substring(0, checkDate.IndexOf(' ')) : checkDate;
+                return (checkDate != null && checkDate.Length >= 7) ? checkDate.Substring(0, checkDate.IndexOf(' ')) : checkDate;
             }
             set { checkDate = value; }
         }
@@ -40,7 +56,7 @@ namespace TimeCard.Shared
         {
             get
             {
-                return DateTime.Parse(dateModified).ToLocalTime().ToString("yyyy-MM-ddThh:mm:ss tt");
+                return (dateModified != null) ? DateTime.Parse(dateModified).ToLocalTime().ToString("yyyy-MM-ddThh:mm:ss tt") : null;
             }
             set
             { dateModified = value; }

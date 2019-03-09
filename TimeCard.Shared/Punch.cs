@@ -20,7 +20,7 @@ namespace TimeCard.Shared
         {
             get
             {
-                return timePunch.ToLocalTime().ToString("ddd MM/dd/yyyy hh:mm tt");
+                return (timePunch.CompareTo(DateTime.MinValue) == 0) ? null : timePunch.ToLocalTime().ToString("ddd MM/dd/yyyy hh:mm tt");
             }
             set
             {
@@ -32,7 +32,7 @@ namespace TimeCard.Shared
         {
             get
             {
-                return Convert.ToString(timePunchSeconds);
+                return (timePunchSeconds == 0) ? null : Convert.ToString(timePunchSeconds);
             }
 
             set
@@ -49,7 +49,7 @@ namespace TimeCard.Shared
         {
             get
             {
-                return DateTime.Parse(dateModified).ToLocalTime().ToString("yyyy-MM-ddThh:mm:ss tt");
+                return (String.IsNullOrEmpty(dateModified)) ? null : DateTime.Parse(dateModified).ToLocalTime().ToString("yyyy-MM-ddThh:mm:ss tt");
             }
             set
             {
